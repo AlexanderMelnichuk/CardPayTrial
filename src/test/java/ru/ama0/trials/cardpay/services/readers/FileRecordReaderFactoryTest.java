@@ -11,6 +11,8 @@ import ru.ama0.trials.cardpay.CardpayOrdersParserApplication;
 
 import java.io.File;
 
+import static ru.ama0.trials.cardpay.utils.FileUtilsTest.getFileByName;
+
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = {CardpayOrdersParserApplication.class})
 @TestPropertySource(locations="classpath:application.properties")
@@ -22,8 +24,8 @@ public class FileRecordReaderFactoryTest {
     @Test
     public void givenSupportedExtensionWhenGetThenReturnProperFileRecordReader() {
         // Act
-        FileRecordReader csvReader = factory.get(new File("test.csv"));
-        FileRecordReader jsonReader = factory.get(new File("test.json"));
+        FileRecordReader csvReader = factory.get(getFileByName("test.csv"));
+        FileRecordReader jsonReader = factory.get(getFileByName("test.json"));
 
         // Assert
         Assert.isAssignable(CsvFileRecordReader.class, csvReader.getClass());

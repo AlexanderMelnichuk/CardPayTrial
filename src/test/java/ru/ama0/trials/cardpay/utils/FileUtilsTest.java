@@ -5,6 +5,7 @@ import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.File;
+import java.net.URL;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
@@ -22,5 +23,14 @@ public class FileUtilsTest {
 
         // Assert
         assertEquals(2, files.size());
+    }
+
+    public static File getFileByName(String fileName) {
+        URL url = Thread.currentThread().getContextClassLoader().getResource(fileName);
+        if (url != null) {
+            return new File(url.getFile());
+        } else {
+            return new File(fileName);
+        }
     }
 }

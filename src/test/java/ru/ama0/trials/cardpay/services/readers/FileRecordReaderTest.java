@@ -1,17 +1,22 @@
 package ru.ama0.trials.cardpay.services.readers;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import org.mockito.InOrder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockReset;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestContextManager;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 import ru.ama0.trials.cardpay.CardpayOrdersParserApplication;
 import ru.ama0.trials.cardpay.data.RawRecord;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -22,24 +27,50 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.calls;
 import static org.mockito.Mockito.inOrder;
+import static ru.ama0.trials.cardpay.utils.FileUtilsTest.getFileByName;
 
-@RunWith(SpringRunner.class)
+@RunWith(Parameterized.class)
 @ContextConfiguration(classes = {CardpayOrdersParserApplication.class})
 @TestPropertySource(locations="classpath:application.properties")
-public class CsvFileRecordReaderTest {
-    private static final String CSV_FILENAME = "src/test/resources/test.csv";
+public class FileRecordReaderTest {
 
-    @SpyBean
+    private TestContextManager testContextManager;
+
+    @SpyBean(reset = MockReset.BEFORE)
     private BlockingQueue<RawRecord> readQueue;
 
     @Autowired
     FileRecordReaderFactory factory;
 
+    private String fileName;
+
+    public FileRecordReaderTest(String fileName) {
+        this.fileName = fileName;
+    }
+
+    @Parameterized.Parameters
+    public static Collection archivesToTest() {
+        return Arrays.asList(
+                "test.csv",
+                "test.json");
+    }
+
+    @Before
+    public void setUpContext() throws Exception {
+        // Enabling Spring Context without SpringRunner
+        this.testContextManager = new TestContextManager(getClass());
+        this.testContextManager.prepareTestInstance(this);
+
+        // Preparing the queue for next run
+        readQueue.clear();
+    }
+
     @Test
     public void givenValidCsvWhenCsvReaderCallThenCreateRawRecords() throws Exception {
         // Arrange
         ExecutorService threadPool = Executors.newFixedThreadPool(1);
-        FileRecordReader reader = factory.get(new File(CSV_FILENAME));
+        File file = getFileByName(fileName);
+        FileRecordReader reader = factory.get(file);
 
         // Act
         Future<Void> future = threadPool.submit(reader);
@@ -59,7 +90,7 @@ public class CsvFileRecordReaderTest {
         assertEquals("1893", rawRecord2.getAmount());
         assertEquals("оплата заказа", rawRecord2.getComment());
         assertEquals("USD", rawRecord2.getCurrency());
-        assertEquals("test.csv", rawRecord2.getFilename());
+        assertEquals(fileName, rawRecord2.getFilename());
         assertEquals((Long)2L, rawRecord2.getLine());
         assertNull(rawRecord2.getResult());
 
@@ -67,7 +98,7 @@ public class CsvFileRecordReaderTest {
         assertEquals("3954", rawRecord3.getAmount());
         assertEquals("Счёт 855", rawRecord3.getComment());
         assertEquals("RUB", rawRecord3.getCurrency());
-        assertEquals("test.csv", rawRecord3.getFilename());
+        assertEquals(fileName, rawRecord3.getFilename());
         assertEquals((Long)3L, rawRecord3.getLine());
         assertNull(rawRecord3.getResult());
     }
