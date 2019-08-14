@@ -1,6 +1,7 @@
 package ru.ama0.trials.cardpay.utils;
 
 import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.util.Arrays;
@@ -8,6 +9,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @UtilityClass
+@Slf4j
 public class FileUtils {
     public static String getFileExtension(File file) {
         if (file == null) {
@@ -26,10 +28,13 @@ public class FileUtils {
         return Arrays.stream(fileNames)
                 .distinct()
                 .map(File::new)
-                .peek(file -> {
-                    if (!FileUtils.fileExists(file)) {
-                        throw new IllegalArgumentException(String.format("Input filename (%s) does not exist.",
-                                file.toPath().toAbsolutePath()));
+                .filter(file -> {
+                    if (FileUtils.fileExists(file)) {
+                        return true;
+                    } else {
+                        log.error("Input filename '{}' does not exist.",
+                                file.toPath().toAbsolutePath());
+                        return false;
                     }
                 })
                 .collect(Collectors.toSet());
