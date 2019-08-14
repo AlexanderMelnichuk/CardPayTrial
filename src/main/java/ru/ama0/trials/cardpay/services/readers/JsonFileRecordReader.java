@@ -22,9 +22,13 @@ public class JsonFileRecordReader extends AbstractFileRecordReader {
         Gson gson = new Gson();
         try (JsonReader reader = new JsonReader(new FileReader(file))) {
             reader.beginArray();
+            long lineNumber = 1;
             while (reader.hasNext()) {
                 RawRecord rawRecord = gson.fromJson(reader, RawRecord.class);
+                rawRecord.setFilename(file.getName());
+                rawRecord.setLine(lineNumber);
                 readQueue.put(rawRecord);
+                lineNumber++;
             }
             reader.endArray();
         }
