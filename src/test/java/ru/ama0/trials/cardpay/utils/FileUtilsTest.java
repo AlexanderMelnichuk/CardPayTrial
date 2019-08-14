@@ -14,9 +14,13 @@ import static org.junit.Assert.assertEquals;
 public class FileUtilsTest {
 
     @Test
-    public void givenListOfExistingFilenamesWhenConvertAndCheckFilesExistThenConvert() {
+    public void whenConvertAndCheckFilesExistThenConvertAndSkipMissingFiles() {
         // Arrange
-        String[] fileNames = new String[] {"src/test/resources/test.csv", "src/test/resources/test.json"};
+        String[] fileNames = new String[] {
+                "src/test/resources/test.csv",
+                "src/test/resources/test.json",
+                "src/test/resources/missing-file.csv"
+        };
 
         // Act
         Set<File> files = FileUtils.convertAndCheckFilesExist(fileNames);
