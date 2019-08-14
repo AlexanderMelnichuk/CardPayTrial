@@ -76,25 +76,20 @@ public class ProcessorService {
         for (Future<Void> converterFuture : converterFutures) {
             converterFuture.cancel(true);
         }
-
-        converterServicePool.shutdown();
-        try {
-            while (!converterServicePool.isTerminated()) {
-                converterServicePool.awaitTermination(TERMINATION_WAIT_SECONDS, TimeUnit.SECONDS);
-            }
-        } catch (InterruptedException e) {
-            log.error("Converter service termination wait interrupted");
-        }
+        shutdownExecutor(converterServicePool, "Converters service pool");
 
         writerFuture.cancel(true);
-        writerService.shutdown();
+        shutdownExecutor(writerService, "Writer service");
+    }
 
+    private void shutdownExecutor(ExecutorService executor, String serviceName) {
+        executor.shutdown();
         try {
-            while (!writerService.isTerminated()) {
-                writerService.awaitTermination(TERMINATION_WAIT_SECONDS, TimeUnit.SECONDS);
+            while (!executor.isTerminated()) {
+                executor.awaitTermination(TERMINATION_WAIT_SECONDS, TimeUnit.SECONDS);
             }
         } catch (InterruptedException e) {
-            log.error("Writer service termination wait interrupted");
+            log.error("{} termination wait interrupted", serviceName);
         }
     }
 }
