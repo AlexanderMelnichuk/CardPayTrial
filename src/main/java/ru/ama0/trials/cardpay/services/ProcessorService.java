@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import ru.ama0.trials.cardpay.services.readers.FileRecordReaderFactory;
-import ru.ama0.trials.cardpay.util.FileUtils;
+import ru.ama0.trials.cardpay.utils.FileUtils;
 
 import java.io.File;
 import java.util.ArrayList;

@@ -1,4 +1,4 @@
-package ru.ama0.trials.cardpay.util;
+package ru.ama0.trials.cardpay.utils;
 
 import lombok.experimental.UtilityClass;
 
@@ -19,7 +19,7 @@ public class FileUtils {
     }
 
     public static boolean fileExists(File file) {
-        return file.exists() && !file.isDirectory();
+        return (file != null) && file.exists() && !file.isDirectory();
     }
 
     public static Set<File> convertAndCheckFilesExist(String... fileNames) {

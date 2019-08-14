@@ -2,7 +2,7 @@ package ru.ama0.trials.cardpay.services.readers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import ru.ama0.trials.cardpay.util.FileUtils;
+import ru.ama0.trials.cardpay.utils.FileUtils;
 import ru.ama0.trials.cardpay.data.RawRecord;
 
 import java.io.File;
