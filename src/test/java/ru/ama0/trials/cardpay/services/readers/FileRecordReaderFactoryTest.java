@@ -35,13 +35,13 @@ public class FileRecordReaderFactoryTest {
     @Test (expected = IllegalArgumentException.class)
     public void givenUnsupportedExtensionWhenGetThenThrow() {
         // Act & Assert
-        FileRecordReader reader = factory.get(new File("test.unsupported"));
+        factory.get(new File("test.unsupported"));
     }
 
     @Test (expected = IllegalArgumentException.class)
     public void givenNullFileWhenGetThenThrow() {
         // Act & Assert
-        FileRecordReader reader = factory.get(null);
+        factory.get(null);
     }
 
 }
