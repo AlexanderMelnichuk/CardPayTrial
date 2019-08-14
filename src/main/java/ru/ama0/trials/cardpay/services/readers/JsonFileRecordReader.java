@@ -1,13 +1,13 @@
-package ru.ama0.trials.cardpay.readers;
+package ru.ama0.trials.cardpay.services.readers;
 
-import ru.ama0.trials.cardpay.data.Record;
+import ru.ama0.trials.cardpay.data.RawRecord;
 
 import java.io.File;
 import java.util.concurrent.BlockingQueue;
 
 public class JsonFileRecordReader extends AbstractFileRecordReader {
 
-    public JsonFileRecordReader(File file, BlockingQueue<Record> queue) {
+    public JsonFileRecordReader(File file, BlockingQueue<RawRecord> queue) {
         super(file, queue);
     }
 

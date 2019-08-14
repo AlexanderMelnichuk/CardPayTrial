@@ -1,4 +1,4 @@
-package ru.ama0.trials.cardpay.readers;
+package ru.ama0.trials.cardpay.services.readers;
 
 import java.util.concurrent.Callable;
 

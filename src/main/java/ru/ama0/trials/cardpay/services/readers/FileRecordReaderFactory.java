@@ -1,9 +1,9 @@
-package ru.ama0.trials.cardpay.readers;
+package ru.ama0.trials.cardpay.services.readers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.ama0.trials.cardpay.util.FileUtils;
-import ru.ama0.trials.cardpay.data.Record;
+import ru.ama0.trials.cardpay.data.RawRecord;
 
 import java.io.File;
 import java.util.HashMap;
@@ -13,7 +13,7 @@ import java.util.function.BiFunction;
 
 @Component
 public class FileRecordReaderFactory {
-    private static final Map<String, BiFunction<File, BlockingQueue<Record>, FileRecordReader>> readers;
+    private static final Map<String, BiFunction<File, BlockingQueue<RawRecord>, FileRecordReader>> readers;
 
     static {
         readers = new HashMap<>();
@@ -22,11 +22,11 @@ public class FileRecordReaderFactory {
         // Add readers for other formats (e.g. xlsx) here if needed
     }
 
-    private BlockingQueue<Record> queue;
+    private BlockingQueue<RawRecord> readQueue;
 
     @Autowired
-    public FileRecordReaderFactory(BlockingQueue<Record> queue) {
-        this.queue = queue;
+    public FileRecordReaderFactory(BlockingQueue<RawRecord> readQueue) {
+        this.readQueue = readQueue;
     }
 
     public FileRecordReader get(File inputFile) {
@@ -38,10 +38,10 @@ public class FileRecordReaderFactory {
 
         return readers
                 .getOrDefault(fileExtension, this::throwExtensionNotSupported)
-                .apply(inputFile, queue);
+                .apply(inputFile, readQueue);
     }
 
-    private FileRecordReader throwExtensionNotSupported(File file, BlockingQueue<Record> queue) {
+    private FileRecordReader throwExtensionNotSupported(File file, BlockingQueue<RawRecord> readQueue) {
         throw new UnsupportedOperationException(String.format("File (%s) has unsupported extension", file.getName()));
     }
 }

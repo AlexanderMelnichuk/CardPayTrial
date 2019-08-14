@@ -1,4 +1,4 @@
-package ru.ama0.trials.cardpay.writers;
+package ru.ama0.trials.cardpay.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -6,26 +6,28 @@ import org.springframework.stereotype.Component;
 import ru.ama0.trials.cardpay.data.Record;
 
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 @Component
-public class JsonRecordWriter implements RecordWriter {
+public class RecordWriter implements Callable<Void> {
 
     private static final int POLL_TIMEOUT_SECONDS = 1;
-    private BlockingQueue<Record> queue;
+    private BlockingQueue<Record> writeQueue;
 
     @Autowired
-    public JsonRecordWriter(BlockingQueue<Record> queue) {
-        this.queue = queue;
+    public RecordWriter(BlockingQueue<Record> writeQueue) {
+        this.writeQueue = writeQueue;
     }
 
     public Void call() throws Exception {
+        boolean isInterrupted = false;
+
         ObjectMapper objectMapper = new ObjectMapper();
         Record record;
-        boolean isInterrupted = false;
-        while (!queue.isEmpty() || !isInterrupted) {
+        while (!writeQueue.isEmpty() || !isInterrupted) {
             try {
-                record = queue.poll(POLL_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+                record = writeQueue.poll(POLL_TIMEOUT_SECONDS, TimeUnit.SECONDS);
                 if (record != null) {
                     System.out.println(objectMapper.writeValueAsString(record));
                 }

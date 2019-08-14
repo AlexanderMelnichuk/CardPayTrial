@@ -1,7 +1,7 @@
-package ru.ama0.trials.cardpay.readers;
+package ru.ama0.trials.cardpay.services.readers;
 
 import lombok.RequiredArgsConstructor;
-import ru.ama0.trials.cardpay.data.Record;
+import ru.ama0.trials.cardpay.data.RawRecord;
 
 import java.io.File;
 import java.util.concurrent.BlockingQueue;
@@ -10,6 +10,6 @@ import java.util.concurrent.BlockingQueue;
 public abstract class AbstractFileRecordReader implements FileRecordReader {
 
     protected final File file;
-    protected final BlockingQueue<Record> queue;
+    protected final BlockingQueue<RawRecord> readQueue;
 
 }

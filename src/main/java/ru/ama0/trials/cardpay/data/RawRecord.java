@@ -5,9 +5,9 @@ import lombok.Data;
 
 @Builder
 @Data
-public class Record {
-    private final Long id;
-    private final Double amount;
+public class RawRecord {
+    private final String orderId;
+    private final String amount;
     private final String currency;
     private final String comment;
     private String filename;

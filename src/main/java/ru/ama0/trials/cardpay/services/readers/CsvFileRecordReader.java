@@ -1,29 +1,25 @@
-package ru.ama0.trials.cardpay.readers;
+package ru.ama0.trials.cardpay.services.readers;
 
 import org.springframework.beans.factory.annotation.Value;
-import ru.ama0.trials.cardpay.data.ConstraintValidator;
-import ru.ama0.trials.cardpay.data.Record;
+import ru.ama0.trials.cardpay.data.RawRecord;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
 public class CsvFileRecordReader extends AbstractFileRecordReader {
 
-    ConstraintValidator<Record> validator = new ConstraintValidator<>();
-
     @Value("${reader.csv.separator}")
     private String csvSeparator = ",";
 
-    public CsvFileRecordReader(File file, BlockingQueue<Record> queue) {
-        super(file, queue);
+    public CsvFileRecordReader(File file, BlockingQueue<RawRecord> readQueue) {
+        super(file, readQueue);
     }
 
     @Override
     public Void call() throws Exception {
-        Record record;
+        RawRecord rawRecord;
         try (FileReader fileReader = new FileReader(file);
              BufferedReader bufferedReader = new BufferedReader(fileReader)) {
             long lineNumber = 1;
@@ -31,7 +27,7 @@ public class CsvFileRecordReader extends AbstractFileRecordReader {
                 String row = bufferedReader.readLine();
                 String[] fields = row.split(csvSeparator);
                 if (fields.length < 4) {
-                    record = Record.builder()
+                    rawRecord = RawRecord.builder()
                             .orderId(fields[0])
                             .amount(fields.length > 1 ? fields[1] : "")
                             .currency(fields.length > 2 ? fields[2] : "")
@@ -41,7 +37,7 @@ public class CsvFileRecordReader extends AbstractFileRecordReader {
                             .result(String.format("Missing %d required field(s)", 4 - fields.length))
                             .build();
                 } else {
-                    record = Record.builder()
+                    rawRecord = RawRecord.builder()
                             .orderId(fields[0])
                             .amount(fields[1])
                             .currency(fields[2])
@@ -51,11 +47,7 @@ public class CsvFileRecordReader extends AbstractFileRecordReader {
                             .build();
                 }
                 lineNumber++;
-                List<String> errors = validator.validate(record);
-                if (!errors.isEmpty()) {
-                    record.setResult(errors.stream().reduce("", String::concat));
-                }
-                queue.put(record);
+                readQueue.put(rawRecord);
             }
         }
         return null;
