@@ -27,7 +27,7 @@ import static org.mockito.Mockito.inOrder;
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = {CardpayOrdersParserApplication.class})
 @TestPropertySource(locations="classpath:application.properties")
-public class RecordConverterTests {
+public class RecordConverterTest {
 
     @Autowired
     private BlockingQueue<RawRecord> readQueue;
