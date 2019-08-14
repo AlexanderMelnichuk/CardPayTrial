@@ -2,75 +2,94 @@ package ru.ama0.trials.cardpay.services;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InOrder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import ru.ama0.trials.cardpay.CardpayOrdersParserApplication;
-import ru.ama0.trials.cardpay.data.RawRecord;
-import ru.ama0.trials.cardpay.services.readers.FileRecordReader;
-import ru.ama0.trials.cardpay.services.readers.FileRecordReaderFactory;
+import ru.ama0.trials.cardpay.data.Record;
 
-import java.io.File;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.io.ByteArrayOutputStream;
+import java.io.FileDescriptor;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.*;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.calls;
-import static org.mockito.Mockito.inOrder;
+import static ru.ama0.trials.cardpay.services.RecordConverterTest.CURRENCIES;
 
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = {CardpayOrdersParserApplication.class})
-@TestPropertySource(locations="classpath:application.properties")
+@TestPropertySource(locations = "classpath:application.properties")
 public class RecordWriterTest {
-    private static final String CSV_FILENAME = "src/test/resources/test.csv";
-
-    @SpyBean
-    private BlockingQueue<RawRecord> readQueue;
 
     @Autowired
-    FileRecordReaderFactory factory;
+    private BlockingQueue<Record> writeQueue;
+
+    @Autowired
+    private RecordWriter recordWriter;
 
     @Test
-    public void givenValidCsvWhenCsvReaderCallThenCreateRawRecords() throws Exception {
+    public void givenValidRecordWhenRecordWriterCallThenPrintJsonToStdOut() throws Exception {
         // Arrange
-        ExecutorService threadPool = Executors.newFixedThreadPool(1);
-        FileRecordReader reader = factory.get(new File(CSV_FILENAME));
+        List<Record> recordList = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            recordList.add(Record.builder()
+                    .id((long) i)
+                    .amount(100.0 * i)
+                    .comment("Some record " + i)
+                    .currency(CURRENCIES.get(i))
+                    .filename(String.format("file%d.txt", (i + 1) / 2))
+                    .line(i + 5L)
+                    .build()
+            );
+        }
+
+        for (Record record : recordList) {
+            try {
+                writeQueue.put(record);
+            } catch (InterruptedException e) {
+                // ignore
+            }
+        }
+
+        ExecutorService threadExecutor = Executors.newSingleThreadExecutor();
+        CountDownLatch latch = new CountDownLatch(1);
+
+        ByteArrayOutputStream baos = redirectStdOut();
 
         // Act
-        Future<Void> future = threadPool.submit(reader);
-        future.get();
-        threadPool.shutdown();
+        Future<Void> future = threadExecutor.submit(recordWriter);
+        while (!writeQueue.isEmpty()) {
+            latch.await(50, TimeUnit.MILLISECONDS);
+        }
+
+        future.cancel(true);
+        threadExecutor.shutdown();
 
         // Assert
-        InOrder inOrder = inOrder(readQueue);
-        inOrder.verify(readQueue, calls(31)).put(any());
-        assertEquals(31, readQueue.size());
+        recoverStdOut();
 
-        readQueue.poll();
-        RawRecord rawRecord2 = readQueue.poll();
-        RawRecord rawRecord3 = readQueue.poll();
-
-        assertEquals("1", rawRecord2.getOrderId());
-        assertEquals("1893", rawRecord2.getAmount());
-        assertEquals("оплата заказа", rawRecord2.getComment());
-        assertEquals("USD", rawRecord2.getCurrency());
-        assertEquals("test.csv", rawRecord2.getFilename());
-        assertEquals((Long)2L, rawRecord2.getLine());
-        assertNull(rawRecord2.getResult());
-
-        assertEquals("2", rawRecord3.getOrderId());
-        assertEquals("3954", rawRecord3.getAmount());
-        assertEquals("Счёт 855", rawRecord3.getComment());
-        assertEquals("RUB", rawRecord3.getCurrency());
-        assertEquals("test.csv", rawRecord3.getFilename());
-        assertEquals((Long)3L, rawRecord3.getLine());
-        assertNull(rawRecord3.getResult());
+        String expectedOutput = "{\"id\":0,\"amount\":0.0,\"currency\":\"RUR\",\"comment\":\"Some record 0\"," +
+                "\"filename\":\"file0.txt\",\"line\":5}\n{\"id\":1,\"amount\":100.0,\"currency\":\"USD\"," +
+                "\"comment\":\"Some record 1\",\"filename\":\"file1.txt\",\"line\":6}\n{\"id\":2,\"amount\"" +
+                ":200.0,\"currency\":\"JPY\",\"comment\":\"Some record 2\",\"filename\":\"file1.txt\",\"line\":7}\n" +
+                "{\"id\":3,\"amount\":300.0,\"currency\":\"KRW\",\"comment\":\"Some record 3\",\"filename\":" +
+                "\"file2.txt\",\"line\":8}\n{\"id\":4,\"amount\":400.0,\"currency\":\"RUR\",\"comment\":" +
+                "\"Some record 4\",\"filename\":\"file2.txt\",\"line\":9}\n";
+        assertEquals(expectedOutput, baos.toString());
     }
+
+    private ByteArrayOutputStream redirectStdOut() {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(baos));
+        return baos;
+    }
+
+    private void recoverStdOut() {
+        System.setOut(new PrintStream(new FileOutputStream(FileDescriptor.out)));
+    }
+
 }

@@ -38,7 +38,7 @@ public class RecordConverterTest {
     @Autowired
     RecordConverter recordConverter;
 
-    private static final List<String> CURRENCIES =
+    public static final List<String> CURRENCIES =
             Collections.unmodifiableList(Arrays.asList("RUR", "USD", "JPY", "KRW", "RUR"));
 
     @Test
