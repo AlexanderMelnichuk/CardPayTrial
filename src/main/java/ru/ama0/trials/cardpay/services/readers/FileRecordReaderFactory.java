@@ -42,6 +42,6 @@ public class FileRecordReaderFactory {
     }
 
     private FileRecordReader throwExtensionNotSupported(File file, BlockingQueue<RawRecord> readQueue) {
-        throw new UnsupportedOperationException(String.format("File (%s) has unsupported extension", file.getName()));
+        throw new IllegalArgumentException(String.format("File (%s) has unsupported extension", file.getName()));
     }
 }

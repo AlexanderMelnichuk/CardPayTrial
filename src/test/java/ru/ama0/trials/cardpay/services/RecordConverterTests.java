@@ -25,11 +25,7 @@ import static org.mockito.Mockito.calls;
 import static org.mockito.Mockito.inOrder;
 
 @RunWith(SpringRunner.class)
-@ContextConfiguration(classes = {
-                CardpayOrdersParserApplication.class,
-                SpringConfiguration.class
-        }
-)
+@ContextConfiguration(classes = {CardpayOrdersParserApplication.class})
 @TestPropertySource(locations="classpath:application.properties")
 public class RecordConverterTests {
 
