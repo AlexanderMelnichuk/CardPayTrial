@@ -66,7 +66,7 @@ public class ProcessorService {
             try {
                 readerFuture.get();
             } catch (ExecutionException e) {
-                log.error("Error during file reading", e);
+                log.error("Error during file reading:\n{}", e.getMessage());
             } catch (InterruptedException e) {
                 log.error("Reading interrupted");
             }
