@@ -6,8 +6,11 @@ import lombok.extern.slf4j.Slf4j;
 import ru.ama0.trials.cardpay.data.RawRecord;
 
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.util.concurrent.BlockingQueue;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 @Slf4j
 public class JsonFileRecordReader extends AbstractFileRecordReader {
@@ -20,7 +23,9 @@ public class JsonFileRecordReader extends AbstractFileRecordReader {
     public Void call() throws Exception {
 
         Gson gson = new Gson();
-        try (JsonReader reader = new JsonReader(new FileReader(file))) {
+        try (FileInputStream fileInputStream = new FileInputStream(file);
+             InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream, UTF_8);
+             JsonReader reader = new JsonReader(inputStreamReader)) {
             reader.beginArray();
             long lineNumber = 1;
             while (reader.hasNext()) {
