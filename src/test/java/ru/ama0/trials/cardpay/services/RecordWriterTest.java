@@ -72,13 +72,12 @@ public class RecordWriterTest {
         // Assert
         recoverStdOut();
 
-        String expectedOutput = "{\"id\":0,\"amount\":0.0,\"currency\":\"RUR\",\"comment\":\"Some record 0\"," +
-                "\"filename\":\"file0.txt\",\"line\":5}\n{\"id\":1,\"amount\":100.0,\"currency\":\"USD\"," +
-                "\"comment\":\"Some record 1\",\"filename\":\"file1.txt\",\"line\":6}\n{\"id\":2,\"amount\"" +
-                ":200.0,\"currency\":\"JPY\",\"comment\":\"Some record 2\",\"filename\":\"file1.txt\",\"line\":7}\n" +
-                "{\"id\":3,\"amount\":300.0,\"currency\":\"KRW\",\"comment\":\"Some record 3\",\"filename\":" +
-                "\"file2.txt\",\"line\":8}\n{\"id\":4,\"amount\":400.0,\"currency\":\"RUR\",\"comment\":" +
-                "\"Some record 4\",\"filename\":\"file2.txt\",\"line\":9}\n";
+        String expectedOutput =
+                "{\"id\":0,\"amount\":0.0,\"currency\":\"RUR\",\"comment\":\"Some record 0\",\"filename\":\"file0.txt\",\"line\":5}" + System.lineSeparator() +
+                "{\"id\":1,\"amount\":100.0,\"currency\":\"USD\",\"comment\":\"Some record 1\",\"filename\":\"file1.txt\",\"line\":6}" + System.lineSeparator() +
+                "{\"id\":2,\"amount\":200.0,\"currency\":\"JPY\",\"comment\":\"Some record 2\",\"filename\":\"file1.txt\",\"line\":7}" + System.lineSeparator() +
+                "{\"id\":3,\"amount\":300.0,\"currency\":\"KRW\",\"comment\":\"Some record 3\",\"filename\":\"file2.txt\",\"line\":8}" + System.lineSeparator() +
+                "{\"id\":4,\"amount\":400.0,\"currency\":\"RUR\",\"comment\":\"Some record 4\",\"filename\":\"file2.txt\",\"line\":9}" + System.lineSeparator();
         assertEquals(expectedOutput, baos.toString());
     }
 
