@@ -23,7 +23,7 @@ public class FileExtensionTest {
 
     @Parameterized.Parameters
     public static Collection archivesToTest() {
-        return Arrays.asList(new Object[][]{
+        return Arrays.asList(new Object[][] {
                 {null, ""},
                 {new File("source2.zip"), "zip"},
                 {new File("order.txt"), "txt"},

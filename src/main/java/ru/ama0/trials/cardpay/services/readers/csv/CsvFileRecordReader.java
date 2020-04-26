@@ -1,7 +1,11 @@
-package ru.ama0.trials.cardpay.services.readers;
+package ru.ama0.trials.cardpay.services.readers.csv;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 import ru.ama0.trials.cardpay.data.RawRecord;
+import ru.ama0.trials.cardpay.services.readers.AbstractFileRecordReader;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -11,10 +15,12 @@ import java.util.concurrent.BlockingQueue;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+@Component
+@Scope(BeanDefinition.SCOPE_PROTOTYPE)
 public class CsvFileRecordReader extends AbstractFileRecordReader {
 
-    @Value("${reader.csv.separator}")
-    private String csvSeparator = ",";
+    @Value("${reader.csv.separator:,}")
+    private String csvSeparator;
 
     public CsvFileRecordReader(File file, BlockingQueue<RawRecord> readQueue) {
         super(file, readQueue);

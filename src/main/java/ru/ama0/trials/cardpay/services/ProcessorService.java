@@ -5,21 +5,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
-import ru.ama0.trials.cardpay.services.readers.FileRecordReaderFactory;
 import ru.ama0.trials.cardpay.utils.FileUtils;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @Slf4j
 public class ProcessorService {
     private static final int TERMINATION_WAIT_SECONDS = 5;
 
-    private final FileRecordReaderFactory recordReaderFactory;
+    private final ReaderFactoryProvider readerFactoryProvider;
     private final RecordWriter recordWriter;
 
     @Value("${readers.threads.max.number}")
@@ -31,10 +34,10 @@ public class ProcessorService {
     ApplicationContext context;
 
     @Autowired
-    public ProcessorService(FileRecordReaderFactory recordReaderFactory,
+    public ProcessorService(ReaderFactoryProvider readerFactoryProvider,
             RecordWriter recordWriter,
             ApplicationContext context) {
-        this.recordReaderFactory = recordReaderFactory;
+        this.readerFactoryProvider = readerFactoryProvider;
         this.recordWriter = recordWriter;
         this.context = context;
     }
@@ -61,7 +64,7 @@ public class ProcessorService {
 
         List<Future<Void>> readerFutures = new ArrayList<>(files.size());
         for (File file : files) {
-            readerFutures.add(readerServicePool.submit(recordReaderFactory.get(file)));
+            readerFutures.add(readerServicePool.submit(readerFactoryProvider.get(file)));
         }
 
         for (Future<Void> readerFuture : readerFutures) {

@@ -1,9 +1,9 @@
-package ru.ama0.trials.cardpay.services.readers;
+package ru.ama0.trials.cardpay.services.readers.json;
 
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
-import lombok.extern.slf4j.Slf4j;
 import ru.ama0.trials.cardpay.data.RawRecord;
+import ru.ama0.trials.cardpay.services.readers.AbstractFileRecordReader;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -12,7 +12,6 @@ import java.util.concurrent.BlockingQueue;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-@Slf4j
 public class JsonFileRecordReader extends AbstractFileRecordReader {
 
     public JsonFileRecordReader(File file, BlockingQueue<RawRecord> queue) {

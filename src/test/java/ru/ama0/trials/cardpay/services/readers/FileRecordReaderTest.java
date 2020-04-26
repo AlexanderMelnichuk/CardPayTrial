@@ -13,6 +13,7 @@ import org.springframework.test.context.TestContextManager;
 import org.springframework.test.context.TestPropertySource;
 import ru.ama0.trials.cardpay.CardpayOrdersParserApplication;
 import ru.ama0.trials.cardpay.data.RawRecord;
+import ru.ama0.trials.cardpay.services.ReaderFactoryProvider;
 
 import java.io.File;
 import java.util.Arrays;
@@ -34,13 +35,11 @@ import static ru.ama0.trials.cardpay.utils.FileUtilsTest.getFileByName;
 @TestPropertySource(locations="classpath:application.properties")
 public class FileRecordReaderTest {
 
-    private TestContextManager testContextManager;
-
     @SpyBean(reset = MockReset.BEFORE)
     private BlockingQueue<RawRecord> readQueue;
 
     @Autowired
-    FileRecordReaderFactory factory;
+    private ReaderFactoryProvider readerFactoryProvider;
 
     private String fileName;
 
@@ -58,8 +57,8 @@ public class FileRecordReaderTest {
     @Before
     public void setUpContext() throws Exception {
         // Enabling Spring Context without SpringRunner
-        this.testContextManager = new TestContextManager(getClass());
-        this.testContextManager.prepareTestInstance(this);
+        TestContextManager testContextManager = new TestContextManager(getClass());
+        testContextManager.prepareTestInstance(this);
 
         // Preparing the queue for next run
         readQueue.clear();
@@ -70,7 +69,7 @@ public class FileRecordReaderTest {
         // Arrange
         ExecutorService threadPool = Executors.newFixedThreadPool(1);
         File file = getFileByName(fileName);
-        FileRecordReader reader = factory.get(file);
+        FileRecordReader reader = readerFactoryProvider.get(file);
 
         // Act
         Future<Void> future = threadPool.submit(reader);

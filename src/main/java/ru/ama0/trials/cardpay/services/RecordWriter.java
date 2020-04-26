@@ -11,6 +11,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 @Component
+@SuppressWarnings("java:S106" /* Standard outputs should not be used directly to log anything */)
 public class RecordWriter implements Callable<Void> {
 
     private static final int POLL_TIMEOUT_SECONDS = 1;
