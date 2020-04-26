@@ -28,13 +28,15 @@ public class ProcessorService {
     @Value("${converters.threads.max.number}")
     private int maxNumberOfConverterThreads = 5;
 
-    @Autowired
     ApplicationContext context;
 
     @Autowired
-    public ProcessorService(FileRecordReaderFactory recordReaderFactory, RecordWriter recordWriter) {
+    public ProcessorService(FileRecordReaderFactory recordReaderFactory,
+            RecordWriter recordWriter,
+            ApplicationContext context) {
         this.recordReaderFactory = recordReaderFactory;
         this.recordWriter = recordWriter;
+        this.context = context;
     }
 
     public void process(String... fileNames) {
@@ -57,7 +59,7 @@ public class ProcessorService {
             converterFutures.add(converterServicePool.submit(context.getBean(RecordConverter.class)));
         }
 
-        List<Future<Void>> readerFutures = new ArrayList<>(fileNames.length);
+        List<Future<Void>> readerFutures = new ArrayList<>(files.size());
         for (File file : files) {
             readerFutures.add(readerServicePool.submit(recordReaderFactory.get(file)));
         }

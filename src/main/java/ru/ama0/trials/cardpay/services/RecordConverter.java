@@ -4,9 +4,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import ru.ama0.trials.cardpay.data.RawRecord;
 import ru.ama0.trials.cardpay.data.Record;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -20,7 +23,6 @@ public class RecordConverter implements Callable<Void> {
     private static final int POLL_TIMEOUT_SECONDS = 1;
     private static final String ERR_ORDER_ID_NUMBER = "orderId '%s' is not a number";
     private static final String ERR_AMOUNT_NUMBER = "amount '%s' is not a number";
-    private static final String ADD_MESSAGE = "%s; %s";
     private static final String RESULT_OK = "OK";
 
     private final BlockingQueue<RawRecord> readQueue;
@@ -51,17 +53,17 @@ public class RecordConverter implements Callable<Void> {
     }
 
     private Record convert(RawRecord rawRecord) {
-        String result = rawRecord.getResult();
+        List<String> results = new ArrayList<>();
+        if (!StringUtils.isEmpty(rawRecord.getResult())) {
+            results.add(rawRecord.getResult());
+        }
 
         long id;
         try {
             id = Long.parseLong(rawRecord.getOrderId());
         } catch (NumberFormatException e) {
             id = 0L;
-            String message = String.format(ERR_ORDER_ID_NUMBER, rawRecord.getOrderId());
-            result = (result == null)
-                    ? message
-                    : String.format(ADD_MESSAGE, result, message);
+            results.add(String.format(ERR_ORDER_ID_NUMBER, rawRecord.getOrderId()));
         }
 
         double amount;
@@ -69,10 +71,7 @@ public class RecordConverter implements Callable<Void> {
             amount = Double.parseDouble(rawRecord.getAmount());
         } catch (NumberFormatException e) {
             amount = Double.NaN;
-            String message = String.format(ERR_AMOUNT_NUMBER, rawRecord.getAmount());
-            result = (result == null)
-                    ? message
-                    : String.format(ADD_MESSAGE, result, message);
+            results.add(String.format(ERR_AMOUNT_NUMBER, rawRecord.getAmount()));
         }
 
         return Record.builder()
@@ -82,7 +81,7 @@ public class RecordConverter implements Callable<Void> {
                 .comment(rawRecord.getComment())
                 .filename(rawRecord.getFilename())
                 .line(rawRecord.getLine())
-                .result(result == null ? RESULT_OK : result)
+                .result(results.isEmpty() ? RESULT_OK : String.join("; ", results))
                 .build();
     }
 

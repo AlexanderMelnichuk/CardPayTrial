@@ -9,7 +9,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import ru.ama0.trials.cardpay.CardpayOrdersParserApplication;
-import ru.ama0.trials.cardpay.config.SpringConfiguration;
 import ru.ama0.trials.cardpay.data.RawRecord;
 import ru.ama0.trials.cardpay.data.Record;
 
@@ -17,7 +16,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -45,7 +49,7 @@ public class RecordConverterTest {
     public void givenValidRawRecordsWhenRecordConverterCallThenCreateOkRecords() throws Exception {
         // Arrange
         List<RawRecord> rawRecordList = new ArrayList<>();
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < CURRENCIES.size(); i++) {
             rawRecordList.add(RawRecord.builder()
                     .orderId(String.valueOf(i))
                     .amount(String.valueOf(100 * i))
@@ -60,8 +64,7 @@ public class RecordConverterTest {
         for (RawRecord rawRecord : rawRecordList) {
             try {
                 readQueue.put(rawRecord);
-            } catch (InterruptedException e) {
-                // ignore
+            } catch (InterruptedException ignored) {
             }
         }
 
